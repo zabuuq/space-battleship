@@ -1,2 +1,6 @@
 Core Idea Questions - ChatGPT Prompt.md
 .env
+.gemini/settings.json
+# Godot 4+ specific ignores
+.godot/
+/android/
