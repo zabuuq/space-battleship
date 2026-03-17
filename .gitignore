@@ -1,6 +1,26 @@
 Core Idea Questions - ChatGPT Prompt.md
 .env
 .gemini/settings.json
+
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Godot Export/Build directories
+/build/
+/builds/
+/export/
+/exports/
+
+# GUT (Godot Unit Test) reports
+gut_results.xml
+coverage.xml
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
