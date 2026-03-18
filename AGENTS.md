@@ -46,11 +46,17 @@ The project is split into a **client** and a **server**:
   * `Battle` – contains two tabbed battlefields (your fleet and the enemy fog‑of‑war view) and
     drives per‑ship actions such as movement, probe scans and missile launches.
   * `EndGame` – shows the win/lose outcome and offers a restart.
-* **Godot MCP server** – A headless Godot application that acts as the relay server.
+* **Godot MCP server** – A headless Godot application (or Node.js relay) that acts as the relay server.
   It accepts lobby creation and join requests, relays turn actions between
   clients, validates moves, enforces turn order and win conditions, and
-  broadcasts updates.  Using the same engine on both sides reduces network
-  desynchronisation and allows reuse of data models.
+  broadcasts updates. Match session state and lobby codes are persisted using
+  **SQLite**, with the database file located at `server/relay.db`.
+
+## Data Persistence
+
+* **SQLite** – All server-side state (active lobbies, player sessions, and match metadata) is stored in a local SQLite database.
+* **Database Location** – The primary database file is `server/relay.db`.
+* **AI Tooling** – The **mcp-sqlite** server is configured to allow agents to directly query this database to troubleshoot networking issues or validate game state synchronisation.
 
 All multiplayer messages must be simple JSON payloads.  The server is the
 authority for match state; clients send action requests and apply confirmed
