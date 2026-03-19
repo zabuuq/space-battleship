@@ -7,7 +7,7 @@ The roadmap below outlines the recommended sequence for tackling the project’s
 - **#1 Initialize Godot project structure** – Sets up the base folder/scene layout.
 - **#2 Configure GDScript linting and formatting** – Ensures consistent code style.
 - **#3 Install and configure GUT testing framework** – Installs the unit-testing framework; start on CI pipeline setup here.
-- **(new) Set up CI pipeline** – Configure GitHub Actions to run tests automatically.
+- **#80 Set up CI pipeline** – Configure GitHub Actions to run tests automatically.
 - **#5 Add initial project documentation** – Document project structure and setup.
 
 These tasks establish the development environment and can be handled by separate agents at the same time.

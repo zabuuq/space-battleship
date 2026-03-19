@@ -12,6 +12,7 @@ This document summarizes the current development environment and provides recomm
 - **Python (v3.14.3)**: Available for backend logic or automation scripts.
 - **Node.js (v24.11.0) & npm (v11.7.0)**: Available for WebSocket relay server development and executing npx commands.
 - **GDToolkit (v4.5.0)**: `gdformat` and `gdlint` are active for code quality enforcement.
+- **itch.io Butler (v15.26.1)**: Active. Enables autonomous deployment to itch.io (`butler push`).
 - **Source Control**: Git (v2.52.0) & GitHub CLI (v2.85.0) are fully integrated.
 - **MCP Servers**:
   - **mcp-github**: Active. Handles issue management, pull requests, and repository operations.
@@ -24,9 +25,7 @@ This document summarizes the current development environment and provides recomm
 
 To enable the full Gemini CLI workflow on this machine, the following tools must be installed and added to the system `PATH`:
 
-1. **itch.io Butler**: Install the `butler` CLI.
-  - *Purpose*: Enables Gemini to autonomously push builds to itch.io (`butler push`).
-2. **ImageMagick & FFmpeg**: Install both CLIs.
+1. **ImageMagick & FFmpeg**: Install both CLIs.
   - *Purpose*: Essential for processing art and audio assets (Issue #90).
 
 ---
