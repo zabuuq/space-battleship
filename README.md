@@ -57,6 +57,23 @@ animations are explicitly out of scope for the first release.
 
 ### Project Status
 
-Development is currently in the planning and architecture phase.  See
+Development is currently in the planning and architecture phase. See
 [`AGENTS.md`](AGENTS.md) for detailed instructions and development rules for the AI agent.
 All contributions should follow the guidelines described there.
+
+## Getting Started
+
+To set up your local development environment, please follow the [Development Setup Guide](docs/setup.md).
+
+## Project Structure
+
+*   `src/client/`: All client-side Godot scenes and scripts.
+    *   `scenes/`: UI and battlefield scenes.
+    *   `scripts/`: Logic for ship behavior, grid management, and networking.
+    *   `assets/`: Textures, fonts, and audio.
+*   `src/shared/`: Data models and utilities used by both client and server.
+*   `server/`: Multiplayer relay server code and database.
+*   `tests/`: 
+    *   `unit/`: GUT unit tests for gameplay systems.
+    *   `e2e/`: Playwright end-to-end browser tests.
+*   `docs/`: Additional technical documentation.
