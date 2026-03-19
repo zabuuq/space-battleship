@@ -4,38 +4,29 @@ This document summarizes the current development environment and provides recomm
 
 ---
 
-## 💻 Environment 1: Big Red
+## 💻 Environment 1: Big Red (Current Computer)
 
 ### ✅ Currently Installed & Configured (Big Red)
 
+- **Godot Engine CLI (v4.6.1)**: Active. Enables headless GUT test execution (`godot --headless`) and automated HTML5 exports.
+- **Python (v3.14.3)**: Available for backend logic or automation scripts.
 - **Node.js (v24.11.0) & npm (v11.7.0)**: Available for WebSocket relay server development and executing npx commands.
+- **GDToolkit (v4.5.0)**: `gdformat` and `gdlint` are active for code quality enforcement.
 - **Source Control**: Git (v2.52.0) & GitHub CLI (v2.85.0) are fully integrated.
 - **MCP Servers**:
   - **mcp-github**: Active. Handles issue management, pull requests, and repository operations.
   - **mcp-chrome-devtools**: Active. Provides direct browser interaction.
-  - **mcp-sqlite**: Active. Configured for local database interactions.
-  - **mcp-godot**: Configured in `.gemini/settings.json`, but requires the Godot executable to be correctly mapped on this machine.
+  - **mcp-godot**: Active. Successfully mapped to the `godot` command in the system PATH.
+  - **mcp-playwright**: Active. Local integration via npx configured for browser automation.
+  - **mcp-sqlite**: Active. Pointed to a placeholder database in the `server` folder (using the Node.js `mcp-server-sqlite-npx` package).
 
-### ❌ Missing & Required Additions (To Match Desktop)
+### ❌ Missing & Required Additions (Big Red)
 
 To enable the full Gemini CLI workflow on this machine, the following tools must be installed and added to the system `PATH`:
 
-1. **Godot Engine CLI**: Download Godot 4.6.1, rename the executable to `godot.exe`, and add its folder to your system `PATH`.
-  - *Purpose*: Allows Gemini to run GUT tests headlessly (`godot --headless`) and perform automated HTML5 exports.
-
-2. **Python (v3.x)**: Install Python and ensure it is in your `PATH`.
-  - *Purpose*: Required for GDToolkit and backend logic/scripts.
-
-3. **GDToolkit (`gdformat`, `gdlint`)**: Install via `pip install gdtoolkit`.
-  - *Purpose*: Required for code quality enforcement and formatting.
-
-4. **Playwright**: Run `npm install -g playwright` and `npx playwright install`.
-  - *Purpose*: For the **mcp-playwright** server to function without prompting for installation.
-
-5. **itch.io Butler**: Install the `butler` CLI.
+1. **itch.io Butler**: Install the `butler` CLI.
   - *Purpose*: Enables Gemini to autonomously push builds to itch.io (`butler push`).
-
-6. **ImageMagick & FFmpeg**: Install both CLIs.
+2. **ImageMagick & FFmpeg**: Install both CLIs.
   - *Purpose*: Essential for processing art and audio assets (Issue #90).
 
 ---
