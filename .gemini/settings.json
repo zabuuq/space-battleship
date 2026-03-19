@@ -21,7 +21,7 @@
       "command": "npx.cmd",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-sqlite",
+        "mcp-server-sqlite-npx",
         "C:\\Users\\jcmcc\\OneDrive\\Space Game\\space-battleship\\server\\relay.db"
       ]
     }
