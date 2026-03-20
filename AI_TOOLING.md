@@ -13,6 +13,8 @@ This document summarizes the current development environment and provides recomm
 - **Node.js (v24.11.0) & npm (v11.7.0)**: Available for WebSocket relay server development and executing npx commands.
 - **GDToolkit (v4.5.0)**: `gdformat` and `gdlint` are active for code quality enforcement.
 - **itch.io Butler (v15.26.1)**: Active. Enables autonomous deployment to itch.io (`butler push`).
+- **ImageMagick (v7.1.2-17)**: Active. Used for sprite sheet slicing, image resizing, and UI asset optimization.
+- **FFmpeg (v8.1)**: Active. Used for audio processing, format conversion (to `.ogg`), and normalization (Issue #90).
 - **Source Control**: Git (v2.52.0) & GitHub CLI (v2.85.0) are fully integrated.
 - **MCP Servers**:
   - **mcp-github**: Active. Handles issue management, pull requests, and repository operations.
@@ -20,13 +22,6 @@ This document summarizes the current development environment and provides recomm
   - **mcp-godot**: Active. Successfully mapped to the `godot` command in the system PATH.
   - **mcp-playwright**: Active. Local integration via npx configured for browser automation.
   - **mcp-sqlite**: Active. Pointed to a placeholder database in the `server` folder (using the Node.js `mcp-server-sqlite-npx` package).
-
-### ❌ Missing & Required Additions (Big Red)
-
-To enable the full Gemini CLI workflow on this machine, the following tools must be installed and added to the system `PATH`:
-
-1. **ImageMagick & FFmpeg**: Install both CLIs.
-  - *Purpose*: Essential for processing art and audio assets (Issue #90).
 
 ---
 
