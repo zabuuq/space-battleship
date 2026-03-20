@@ -78,7 +78,7 @@ Networking tasks depend on a stable game state model and action rules, but they 
 - **#43 Synchronize turn actions over the network**
 - **#44 Handle disconnects and invalid sessions**
 - **#45 Add multiplayer networking tests**, **#71 Add multiplayer sync consistency tests**, **#62 Validate multiplayer gameplay in browser**
-- **#61 Configure Godot HTML5 export**
+- **#61 Configure Godot HTML5 export** – Also adds a `build-web` CI job that produces a versioned HTML5 artifact on merge to `staging`. This artifact is what gets promoted to `main` and deployed; it must not be rebuilt at the deployment stage.
 
 Multiple agents can work on message schema/serialization, WebSocket layer and server logic in parallel, coordinating via agreed message formats.
 
@@ -135,7 +135,8 @@ These can run concurrently toward the end of development.
 
 - **#64 Prepare itch.io deployment package**
 - **#65 Create itch.io release checklist**
+- **#105 Automate itch.io deployment on merge to main** – Adds a `deploy` CI job that downloads the artifact from #61 and pushes it to itch.io via Butler. Requires `ITCHIO_API_KEY` and `ITCHIO_GAME` secrets to be configured in the repository.
 
-These tasks should occur after core gameplay, assets, and testing are complete.
+These tasks should occur after core gameplay, assets, and testing are complete. #105 depends on #61 producing a valid artifact.
 
 Use this roadmap to coordinate multiple agents, allowing parallel progress where dependencies permit, while ensuring foundational components are completed before dependent features.

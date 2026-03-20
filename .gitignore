@@ -1,10 +1,12 @@
-Core Idea Questions - ChatGPT Prompt.md
 .env
 .gemini/settings.json
+settings.local.json
 
 # Godot 4+ specific ignores
 .godot/
 /android/
+*.import
+*.uid
 
 # Godot Export/Build directories
 /build/
@@ -35,3 +37,12 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Python (GDToolkit)
+__pycache__/
+*.pyc
+*.pyo
+
+# Editor
+.vscode/
+.idea/
