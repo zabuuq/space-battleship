@@ -3,7 +3,17 @@
     "allow": [
       "Bash(gh issue:*)",
       "Bash(gh pr:*)",
-      "Bash(gh run:*)"
+      "Bash(gh run:*)",
+      "Bash(godot --version)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(npm --version)",
+      "Bash(gdformat --version)",
+      "Bash(gdlint --version)",
+      "Bash(butler version:*)",
+      "Bash(git --version)",
+      "Bash(gh --version)",
+      "Bash(claude mcp:*)",
+      "Bash(gh auth:*)"
     ]
   }
 }
