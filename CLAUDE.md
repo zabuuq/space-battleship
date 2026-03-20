@@ -37,8 +37,10 @@ npx playwright test
 1. Create feature branches off `staging` (never off `main` or `dev`)
 2. Merge feature branch → `dev` (integration)
 3. Delete the feature branch immediately after merging into `dev` (both local and remote)
-4. Open a PR from `dev` → `staging`
-5. After approval, open a PR from `staging` → `main`
+4. Open a PR from `dev` → `staging` — CI must pass before merging
+5. After approval, open a PR from `staging` → `main` — CI must pass before merging
+
+If a bad merge reaches a shared branch, revert with `git revert -m 1 <merge-commit-sha>` and open a follow-up PR. Never force-push shared branches.
 
 Direct commits to `main` are prohibited. See `AGENTS.md` for the full rules.
 

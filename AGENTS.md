@@ -142,8 +142,10 @@ Expand the test suite as the project grows.  Do not commit code that fails tests
     2.  Implement and test changes in the feature branch.
     3.  Merge the feature branch into `dev`.
     4.  Delete the local and remote feature branch immediately after a successful merge into `dev`.
-    5.  Create a Pull Request from `dev` to `staging`.
-    6.  After approval in `staging`, create a Pull Request from `staging` to `main`.
+    5.  Create a Pull Request from `dev` to `staging`. **CI must pass before merging.**
+    6.  After approval in `staging`, create a Pull Request from `staging` to `main`. **CI must pass before merging.**
+*   **CI gate**: All PRs must have a passing CI run (GUT unit tests + Playwright) before merging at any stage. A failing CI run must be fixed before the PR is approved or merged. Do not merge around a failing pipeline.
+*   **Rollback**: If a bad merge reaches `dev` or `staging`, revert it with `git revert -m 1 <merge-commit-sha>`, commit the revert, and open a follow-up PR through the normal workflow. Do not force-push or reset shared branches.
 *   **Commits**: Write clear, present‑tense commit messages describing what and why.
     Group related changes together; do not commit unrelated features in one go.
 *   **Pushing**: Push your branches to the remote repository.  Do not leave local
