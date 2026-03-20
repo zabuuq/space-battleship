@@ -141,8 +141,9 @@ Expand the test suite as the project grows.  Do not commit code that fails tests
     1.  Create a feature branch off `staging`.
     2.  Implement and test changes in the feature branch.
     3.  Merge the feature branch into `dev`.
-    4.  Create a Pull Request from `dev` to `staging`.
-    5.  After approval in `staging`, create a Pull Request from `staging` to `main`.
+    4.  Delete the local and remote feature branch immediately after a successful merge into `dev`.
+    5.  Create a Pull Request from `dev` to `staging`.
+    6.  After approval in `staging`, create a Pull Request from `staging` to `main`.
 *   **Commits**: Write clear, present‑tense commit messages describing what and why.
     Group related changes together; do not commit unrelated features in one go.
 *   **Pushing**: Push your branches to the remote repository.  Do not leave local
