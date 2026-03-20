@@ -3,6 +3,8 @@ extends Control
 ## BattlefieldGridUI
 ## Renders the 120x12 grid and handles screen-to-grid translation.
 
+signal cell_selected(grid_pos: Vector2i)
+
 const GRID_WIDTH = 120
 const GRID_HEIGHT = 12
 const CELL_SIZE = 16
@@ -11,15 +13,33 @@ const CELL_SIZE = 16
 @export var grid_color: Color = Color(0.3, 0.3, 0.3, 1.0)
 ## The color of the background.
 @export var bg_color: Color = Color(0.05, 0.05, 0.1, 1.0)
+## The color of the selection highlight.
+@export var selection_color: Color = Color(1.0, 1.0, 0.0, 0.3)
+
+var selected_cell: Vector2i = Vector2i(-1, -1)
 
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE)
+	mouse_filter = Control.MOUSE_FILTER_STOP
+
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			var grid_pos = screen_to_grid(event.position)
+			if grid_pos != Vector2i(-1, -1):
+				select_cell(grid_pos)
 
 
 func _draw() -> void:
 	# Draw background
 	draw_rect(Rect2(Vector2.ZERO, size), bg_color)
+
+	# Draw selection highlight
+	if selected_cell != Vector2i(-1, -1):
+		var rect = Rect2(grid_to_screen(selected_cell), Vector2(CELL_SIZE, CELL_SIZE))
+		draw_rect(rect, selection_color)
 
 	# Draw vertical lines
 	for x in range(GRID_WIDTH + 1):
@@ -47,6 +67,14 @@ func screen_to_grid(local_pos: Vector2) -> Vector2i:
 		return Vector2i(-1, -1)
 
 	return Vector2i(grid_x, grid_y)
+
+
+## Updates the selection and emits the signal.
+func select_cell(grid_pos: Vector2i) -> void:
+	if grid_pos != selected_cell:
+		selected_cell = grid_pos
+		queue_redraw()
+		cell_selected.emit(grid_pos)
 
 
 ## Translates a grid coordinate back to its top-left local screen position.
