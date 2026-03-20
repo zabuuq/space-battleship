@@ -115,7 +115,7 @@ Write tests alongside features.  Execute tests with:
 
 ```
 sh
-godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests
+godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests/unit
 ```
 
 Expand the test suite as the project grows.  Do not commit code that fails tests.
