@@ -42,7 +42,7 @@ npx playwright test
 
 If a bad merge reaches a shared branch, revert with `git revert -m 1 <merge-commit-sha>` and open a follow-up PR. Never force-push shared branches.
 
-Direct commits to `main` or `staging` are prohibited. Both branches are protected by GitHub rulesets requiring: 1 approving review, all CI checks passing (branch must be up to date), and linear history (squash or rebase merges only). See `AGENTS.md` for the full rules.
+Direct pushes to `main` or `staging` are prohibited; all changes must reach these branches via pull request. Both branches are protected by GitHub rulesets requiring: 1 approving review, all CI checks passing (branch must be up to date), and linear history (squash or rebase merges only). See `AGENTS.md` for the full rules.
 
 ## Architecture
 
