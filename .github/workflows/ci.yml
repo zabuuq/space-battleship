@@ -21,7 +21,6 @@ jobs:
       - name: Setup Godot
         run: |
           mkdir -p ~/.local/share/godot/export_templates/
-          mv /usr/local/bin/godot /usr/local/bin/godot-headless || true
 
       - name: Run Tests
         run: |
