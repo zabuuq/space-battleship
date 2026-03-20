@@ -25,7 +25,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -glog=1 -gexit -gjunit_xml_file=gut_results.xml
+          godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests/unit -ginclude_subdirs -glog=1 -gexit -gjunit_xml_file=gut_results.xml
 
       - name: Upload GUT Test Report
         uses: actions/upload-artifact@v4
