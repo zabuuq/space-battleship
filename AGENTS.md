@@ -153,7 +153,12 @@ Expand the test suite as the project grows.  Do not commit code that fails tests
     conflicts.
 *   **Documentation**: Update `README.md`, `AGENTS.md` and in‑source comments
     whenever you add or change features.  The repository should remain self‑documenting.
-*   **Branch protection**: Direct merges to `main` are strictly prohibited. Respect all branch protection rules.
+*   **Branch protection**: Both `main` and `staging` are protected by GitHub rulesets. The following are technically enforced and cannot be bypassed:
+    *   No direct pushes or force-pushes.
+    *   All merges must arrive via pull request with at least **1 approving review**.
+    *   Stale approvals are dismissed when new commits are pushed to the PR branch.
+    *   Both CI checks (`Run GUT Tests` and `Run Playwright Tests`) must pass and the branch must be up to date with its target before merging.
+    *   Linear history is required — use squash or rebase merges only (no standard merge commits).
 
 # Boundaries
 
