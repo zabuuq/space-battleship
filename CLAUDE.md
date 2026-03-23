@@ -58,6 +58,8 @@ Direct pushes to `main` or `staging` are prohibited; all changes must reach thes
 
 **`GameState.gd`** — Top-level match container. Owns a `BattlefieldGrid` and a `ships` array of dictionaries. Ship dictionaries carry `id`, `type`, `position` (`Vector2i`), `facing` (`Vector2i`), `length`, `health`, `is_destroyed`. `add_ship()` writes to both the array and the grid. `to_dict()`/`from_dict()` serialize for network transport; `from_dict()` replays ship and missile data to reconstruct grid state from scratch.
 
+**`ShipDefs.gd`** — Canonical ship type registry. Exposes `TYPE_*` string constants, `ABILITY_*` string constants, a `DEFINITIONS` dictionary (keyed by type, each entry has `length`, `health`, `ability`), and a `FLEET_COMPOSITION` array listing the required one-of-each-type fleet. Helpers: `is_valid_type(type)`, `get_definition(type)`, `create_ship_dict(id, type, position, facing)`.
+
 ### Client Rendering (`src/client/`)
 
 **`BattlefieldGridUI.gd`** extends `Control`. Renders the 120×12 grid using custom `_draw()` at 16 px per cell (total 1920×192 px). Translates mouse positions via `screen_to_grid()` and emits the `cell_selected(grid_pos: Vector2i)` signal. Repeated clicks on the same cell do not re-emit the signal.
