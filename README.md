@@ -60,7 +60,8 @@ animations are explicitly out of scope for the first release.
 Development is currently in **Phase 2 – Core data models and rendering**.
 The battlefield grid and game state models are complete, including synchronization
 and serialization. Initial grid rendering and screen-to-grid coordinate
-translation have been implemented.
+translation have been implemented. Ship type definitions and placement metadata
+are now established in `src/shared/ShipDefs.gd`.
 
 See [`AGENTS.md`](AGENTS.md) for detailed instructions and development rules for the AI agent.
 All contributions MUST follow the branching and workflow guidelines described there.
