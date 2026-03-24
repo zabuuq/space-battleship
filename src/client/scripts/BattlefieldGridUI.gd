@@ -2,8 +2,10 @@ extends Control
 
 ## BattlefieldGridUI
 ## Renders the 120x12 grid and handles screen-to-grid translation.
+## Supports overlay rendering for placed ships and placement previews.
 
 signal cell_selected(grid_pos: Vector2i)
+signal cell_hovered(grid_pos: Vector2i)
 
 const GRID_WIDTH = 120
 const GRID_HEIGHT = 12
@@ -15,8 +17,16 @@ const CELL_SIZE = 16
 @export var bg_color: Color = Color(0.05, 0.05, 0.1, 1.0)
 ## The color of the selection highlight.
 @export var selection_color: Color = Color(1.0, 1.0, 0.0, 0.3)
+## The color of preview cells when placement is valid.
+@export var preview_valid_color: Color = Color(0.2, 0.9, 0.2, 0.45)
+## The color of preview cells when placement is invalid.
+@export var preview_invalid_color: Color = Color(0.9, 0.2, 0.2, 0.45)
 
 var selected_cell: Vector2i = Vector2i(-1, -1)
+var _hover_cell: Vector2i = Vector2i(-1, -1)
+var _placed_ship_cells: Dictionary = {}  # Vector2i -> Color
+var _preview_cells: Array[Vector2i] = []
+var _preview_valid: bool = true
 
 
 func _ready() -> void:
@@ -30,11 +40,28 @@ func _gui_input(event: InputEvent) -> void:
 			var grid_pos = screen_to_grid(event.position)
 			if grid_pos != Vector2i(-1, -1):
 				select_cell(grid_pos)
+	elif event is InputEventMouseMotion:
+		var grid_pos = screen_to_grid(event.position)
+		if grid_pos != _hover_cell:
+			_hover_cell = grid_pos
+			if grid_pos != Vector2i(-1, -1):
+				cell_hovered.emit(grid_pos)
+			queue_redraw()
 
 
 func _draw() -> void:
 	# Draw background
 	draw_rect(Rect2(Vector2.ZERO, size), bg_color)
+
+	# Draw placed ship cells
+	for cell: Vector2i in _placed_ship_cells:
+		var color: Color = _placed_ship_cells[cell]
+		draw_rect(Rect2(grid_to_screen(cell), Vector2(CELL_SIZE, CELL_SIZE)), color)
+
+	# Draw preview cells
+	var p_color := preview_valid_color if _preview_valid else preview_invalid_color
+	for cell in _preview_cells:
+		draw_rect(Rect2(grid_to_screen(cell), Vector2(CELL_SIZE, CELL_SIZE)), p_color)
 
 	# Draw selection highlight
 	if selected_cell != Vector2i(-1, -1):
@@ -85,3 +112,16 @@ func grid_to_screen(grid_pos: Vector2i) -> Vector2:
 ## Returns the center screen position of a grid cell.
 func get_cell_center(grid_pos: Vector2i) -> Vector2:
 	return grid_to_screen(grid_pos) + Vector2(CELL_SIZE / 2.0, CELL_SIZE / 2.0)
+
+
+## Sets the overlay cells for placed ships. Keys are Vector2i positions, values are Colors.
+func set_placed_ship_cells(cells: Dictionary) -> void:
+	_placed_ship_cells = cells
+	queue_redraw()
+
+
+## Sets the preview overlay cells and whether the placement is valid.
+func set_preview_cells(cells: Array[Vector2i], valid: bool = true) -> void:
+	_preview_cells = cells
+	_preview_valid = valid
+	queue_redraw()

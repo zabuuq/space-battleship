@@ -1,43 +1,82 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://src/client/scripts/ShipPlacement.gd" id="1_placement"]
+[ext_resource type="PackedScene" path="res://src/client/scenes/BattlefieldGridUI.tscn" id="2_gridui"]
 
-[node name="root" type="Control" unique_id=344372871]
+[node name="root" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_placement")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -100.0
-offset_top = -75.0
-offset_right = 100.0
-offset_bottom = 75.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
-[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Place Your Ships"
+theme_override_font_sizes/font_size = 20
 
-[node name="PlaceholderLabel" type="Label" parent="VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Ship placement — coming soon"
+size_flags_vertical = 3
+theme_override_constants/separation = 12
 
-[node name="ReadyButton" type="Button" parent="VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-text = "Ready"
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="BackButton" type="Button" parent="VBoxContainer"]
+[node name="BattlefieldGridUI" parent="MarginContainer/VBoxContainer/HBoxContainer/ScrollContainer" instance=ExtResource("2_gridui")]
+unique_name_in_owner = true
 layout_mode = 2
+
+[node name="SidePanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 0)
+theme_override_constants/separation = 8
+
+[node name="ShipListLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/SidePanel"]
+layout_mode = 2
+text = "Fleet:"
+
+[node name="ShipListContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = ""
+autowrap_mode = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/SidePanel"]
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/SidePanel/ButtonRow"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Back"
 
-[connection signal="pressed" from="VBoxContainer/ReadyButton" to="." method="_on_ready_button_pressed"]
-[connection signal="pressed" from="VBoxContainer/BackButton" to="." method="_on_back_button_pressed"]
+[node name="ReadyButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/SidePanel/ButtonRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Ready"
+disabled = true
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/SidePanel/ButtonRow/BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/SidePanel/ButtonRow/ReadyButton" to="." method="_on_ready_button_pressed"]
