@@ -6,6 +6,7 @@ extends RefCounted
 ## All public methods are static and require no instantiation.
 ## Issue #17 – Implement ship facing direction model.
 ## Issue #18 – Implement forward movement rules.
+## Issue #19 – Implement turning cost rules.
 
 const GameState = preload("res://src/shared/GameState.gd")
 const ShipDefs = preload("res://src/shared/ShipDefs.gd")
@@ -78,6 +79,31 @@ static func move_forward(game_state: GameState, ship_id: int, steps: int) -> voi
 	var new_pos := forward_position(ship["position"], ship["facing"], steps)
 	_update_grid(game_state.grid, ship, new_pos, ship["facing"])
 	ship["position"] = new_pos
+
+
+# ---------------------------------------------------------------------------
+# Turning (costs one movement action)
+# ---------------------------------------------------------------------------
+
+
+## Returns true if rotating the ship would keep it within grid bounds.
+## Turning consumes the ship's movement action for the turn.
+static func can_turn(game_state: GameState, ship_id: int, direction: String) -> bool:
+	var ship := _find_ship(game_state, ship_id)
+	if ship.is_empty():
+		return false
+	var new_facing := apply_turn(ship["facing"], direction)
+	return PlacementValidator.is_in_bounds(ship["position"], new_facing, ship["length"])
+
+
+## Rotates the ship 90 degrees. Does not validate; call can_turn first.
+static func turn_ship(game_state: GameState, ship_id: int, direction: String) -> void:
+	var ship := _find_ship(game_state, ship_id)
+	if ship.is_empty():
+		return
+	var new_facing := apply_turn(ship["facing"], direction)
+	_update_grid(game_state.grid, ship, ship["position"], new_facing)
+	ship["facing"] = new_facing
 
 
 # ---------------------------------------------------------------------------
