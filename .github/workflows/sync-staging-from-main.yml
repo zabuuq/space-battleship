@@ -1,0 +1,49 @@
+name: Sync staging from main
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  sync:
+    name: Open sync PR staging ← main
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if staging is behind main
+        id: check
+        run: |
+          git fetch origin
+          BEHIND=$(git rev-list origin/staging..origin/main --count)
+          echo "behind=$BEHIND" >> "$GITHUB_OUTPUT"
+
+      - name: Create or enable auto-merge on sync PR
+        if: steps.check.outputs.behind != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EXISTING=$(gh pr list --base staging --head main --json number --jq '.[0].number // ""')
+
+          if [ -z "$EXISTING" ]; then
+            PR_NUMBER=$(gh pr create \
+              --base staging \
+              --head main \
+              --title "chore: sync staging from main" \
+              --body "Automated sync to bring \`staging\` up to date with \`main\` after a squash merge." \
+              --json number --jq '.number')
+            echo "Created PR #$PR_NUMBER"
+          else
+            PR_NUMBER=$EXISTING
+            echo "PR #$PR_NUMBER already exists"
+          fi
+
+          gh pr merge "$PR_NUMBER" --auto --squash
+          echo "Auto-merge enabled on PR #$PR_NUMBER"
