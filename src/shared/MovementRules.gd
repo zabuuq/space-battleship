@@ -8,6 +8,7 @@ extends RefCounted
 ## Issue #18 – Implement forward movement rules.
 ## Issue #19 – Implement turning cost rules.
 ## Issue #20 – Prevent collision during movement.
+## Issue #21 – Implement Destroyer double-move ability.
 
 const GameState = preload("res://src/shared/GameState.gd")
 const ShipDefs = preload("res://src/shared/ShipDefs.gd")
@@ -57,8 +58,11 @@ static func forward_position(pos: Vector2i, facing: Vector2i, steps: int) -> Vec
 
 
 ## Returns the number of forward cells this ship type may move per action.
-## All types move 1 cell by default.
-static func move_steps_for(_ship_type: String) -> int:
+## The Destroyer's ABILITY_DOUBLE_MOVE grants 2 steps; all others get 1.
+static func move_steps_for(ship_type: String) -> int:
+	var defn: Dictionary = ShipDefs.DEFINITIONS.get(ship_type, {})
+	if defn.get("ability") == ShipDefs.ABILITY_DOUBLE_MOVE:
+		return 2
 	return 1
 
 
