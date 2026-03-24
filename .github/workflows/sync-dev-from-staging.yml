@@ -1,0 +1,49 @@
+name: Sync dev from staging
+
+on:
+  push:
+    branches: [staging]
+
+jobs:
+  sync:
+    name: Open sync PR dev ← staging
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if dev is behind staging
+        id: check
+        run: |
+          git fetch origin
+          BEHIND=$(git rev-list origin/dev..origin/staging --count)
+          echo "behind=$BEHIND" >> "$GITHUB_OUTPUT"
+
+      - name: Create or enable auto-merge on sync PR
+        if: steps.check.outputs.behind != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EXISTING=$(gh pr list --base dev --head staging --json number --jq '.[0].number // ""')
+
+          if [ -z "$EXISTING" ]; then
+            PR_NUMBER=$(gh pr create \
+              --base dev \
+              --head staging \
+              --title "chore: sync dev from staging" \
+              --body "Automated sync to bring \`dev\` up to date with \`staging\` after a merge." \
+              --json number --jq '.number')
+            echo "Created PR #$PR_NUMBER"
+          else
+            PR_NUMBER=$EXISTING
+            echo "PR #$PR_NUMBER already exists"
+          fi
+
+          gh pr merge "$PR_NUMBER" --auto --squash
+          echo "Auto-merge enabled on PR #$PR_NUMBER"
