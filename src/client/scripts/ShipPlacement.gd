@@ -5,9 +5,11 @@ extends Control
 ## ship in the fleet onto the battlefield grid, then transitions to Battle.
 ## Issue #12 – Implement ship placement UI.
 ## Issue #13 – Add ship rotation during placement.
+## Issue #14 – Prevent overlapping ship placement.
 
 const ShipDefs = preload("res://src/shared/ShipDefs.gd")
 const GameState = preload("res://src/shared/GameState.gd")
+const PlacementValidator = preload("res://src/shared/PlacementValidator.gd")
 
 ## One colour per fleet slot — matched by ship index.
 const SHIP_COLORS: Array[Color] = [
@@ -48,12 +50,16 @@ func _on_cell_hovered(pos: Vector2i) -> void:
 	if _current_index >= ShipDefs.FLEET_COMPOSITION.size():
 		return
 	var length := _current_ship_length()
-	var cells := _ship_cells(pos, _orientation, length)
-	_grid_ui.set_preview_cells(cells)
+	var cells := PlacementValidator.get_ship_cells(pos, _orientation, length)
+	var valid := PlacementValidator.is_not_overlapping(_game_state.grid, pos, _orientation, length)
+	_grid_ui.set_preview_cells(cells, valid)
 
 
 func _on_cell_selected(pos: Vector2i) -> void:
 	if _current_index >= ShipDefs.FLEET_COMPOSITION.size():
+		return
+	var length := _current_ship_length()
+	if not PlacementValidator.is_not_overlapping(_game_state.grid, pos, _orientation, length):
 		return
 	var type := ShipDefs.FLEET_COMPOSITION[_current_index]
 	var ship := _ship_defs.create_ship_dict(_current_index, type, pos, _orientation)
@@ -73,18 +79,11 @@ func _current_ship_length() -> int:
 	return ShipDefs.DEFINITIONS[ShipDefs.FLEET_COMPOSITION[_current_index]]["length"]
 
 
-func _ship_cells(pos: Vector2i, facing: Vector2i, length: int) -> Array[Vector2i]:
-	var cells: Array[Vector2i] = []
-	for i in range(length):
-		cells.append(pos + facing * i)
-	return cells
-
-
 func _refresh_grid_overlay() -> void:
 	var cells: Dictionary = {}
 	for ship in _game_state.ships:
 		var color: Color = SHIP_COLORS[ship["id"] % SHIP_COLORS.size()]
-		for cell in _ship_cells(ship["position"], ship["facing"], ship["length"]):
+		for cell in PlacementValidator.get_ship_cells(ship["position"], ship["facing"], ship["length"]):
 			cells[cell] = color
 	_grid_ui.set_placed_ship_cells(cells)
 
