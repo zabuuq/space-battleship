@@ -4,6 +4,7 @@ extends Control
 ## Manages the ship placement phase: guides the player through placing each
 ## ship in the fleet onto the battlefield grid, then transitions to Battle.
 ## Issue #12 – Implement ship placement UI.
+## Issue #13 – Add ship rotation during placement.
 
 const ShipDefs = preload("res://src/shared/ShipDefs.gd")
 const GameState = preload("res://src/shared/GameState.gd")
@@ -26,6 +27,7 @@ var _orientation: Vector2i = Vector2i(1, 0)  # horizontal by default
 @onready var _status_label: Label = %StatusLabel
 @onready var _ship_list_container: VBoxContainer = %ShipListContainer
 @onready var _ready_button: Button = %ReadyButton
+@onready var _rotate_button: Button = %RotateButton
 
 
 func _ready() -> void:
@@ -34,6 +36,12 @@ func _ready() -> void:
 	_ready_button.disabled = true
 	_rebuild_ship_list()
 	_update_status()
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_R:
+			_toggle_rotation()
 
 
 func _on_cell_hovered(pos: Vector2i) -> void:
@@ -107,6 +115,19 @@ func _update_status() -> void:
 	var length: int = ShipDefs.DEFINITIONS[type]["length"]
 	var dir: String = "Horizontal" if _orientation == Vector2i(1, 0) else "Vertical"
 	_status_label.text = "Place: %s\nLength: %d\nDir: %s\nClick grid to place" % [type.capitalize(), length, dir]
+
+
+func _toggle_rotation() -> void:
+	if _current_index >= ShipDefs.FLEET_COMPOSITION.size():
+		return
+	_orientation = Vector2i(0, 1) if _orientation == Vector2i(1, 0) else Vector2i(1, 0)
+	_update_status()
+	# Refresh preview at the current hover cell if available
+	_grid_ui.set_preview_cells([])
+
+
+func _on_rotate_button_pressed() -> void:
+	_toggle_rotation()
 
 
 func _on_ready_button_pressed() -> void:

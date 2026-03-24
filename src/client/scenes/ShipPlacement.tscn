@@ -63,6 +63,11 @@ layout_mode = 2
 text = ""
 autowrap_mode = 3
 
+[node name="RotateButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/SidePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Rotate (R)"
+
 [node name="ButtonRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/SidePanel"]
 layout_mode = 2
 
@@ -78,5 +83,6 @@ size_flags_horizontal = 3
 text = "Ready"
 disabled = true
 
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/SidePanel/RotateButton" to="." method="_on_rotate_button_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/SidePanel/ButtonRow/BackButton" to="." method="_on_back_button_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/SidePanel/ButtonRow/ReadyButton" to="." method="_on_ready_button_pressed"]
