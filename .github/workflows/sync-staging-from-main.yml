@@ -33,12 +33,12 @@ jobs:
           EXISTING=$(gh pr list --base staging --head main --json number --jq '.[0].number // ""')
 
           if [ -z "$EXISTING" ]; then
-            PR_NUMBER=$(gh pr create \
+            PR_URL=$(gh pr create \
               --base staging \
               --head main \
               --title "chore: sync staging from main" \
-              --body "Automated sync to bring \`staging\` up to date with \`main\` after a squash merge." \
-              --json number --jq '.number')
+              --body "Automated sync to bring \`staging\` up to date with \`main\` after a squash merge.")
+            PR_NUMBER=$(basename "$PR_URL")
             echo "Created PR #$PR_NUMBER"
           else
             PR_NUMBER=$EXISTING
