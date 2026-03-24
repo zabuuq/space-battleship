@@ -60,6 +60,10 @@ Direct pushes to `main` or `staging` are prohibited; all changes must reach thes
 
 **`ShipDefs.gd`** — Canonical ship type registry. Exposes `TYPE_*` string constants, `ABILITY_*` string constants, a `DEFINITIONS` dictionary (keyed by type, each entry has `length`, `health`, `ability`), and a `FLEET_COMPOSITION` array listing the required one-of-each-type fleet. Helpers: `is_valid_type(type)`, `get_definition(type)`, `create_ship_dict(id, type, position, facing)`.
 
+**`PlacementValidator.gd`** — Static helpers for ship placement validation. `get_ship_cells(pos, facing, length)` enumerates the cells a ship occupies. `is_in_bounds(pos, facing, length)` checks the full ship body stays within the 120×12 grid. `is_not_overlapping(grid, pos, facing, length)` checks for collisions with already-placed ships. `can_place` combines both.
+
+**`MovementRules.gd`** — Static movement rules and geometry. Exposes cardinal direction constants (`DIR_EAST/WEST/NORTH/SOUTH`), turn constants (`TURN_LEFT/RIGHT`), and all movement logic: `apply_turn(facing, direction)`, `forward_position(pos, facing, steps)`, `move_steps_for(ship_type)` (Destroyer returns 2 via `ABILITY_DOUBLE_MOVE`), `can_move_forward(game_state, ship_id, steps)`, `move_forward(game_state, ship_id, steps)`, `can_turn(game_state, ship_id, direction)`, `turn_ship(game_state, ship_id, direction)`.
+
 ### Client Rendering (`src/client/`)
 
 **`BattlefieldGridUI.gd`** extends `Control`. Renders the 120×12 grid using custom `_draw()` at 16 px per cell (total 1920×192 px). Translates mouse positions via `screen_to_grid()` and emits the `cell_selected(grid_pos: Vector2i)` signal. Repeated clicks on the same cell do not re-emit the signal.
