@@ -5,6 +5,7 @@ extends RefCounted
 ## Tracks whose turn it is, advances turns, and coordinates end-of-turn effects.
 ## Issue #35 – Implement turn manager.
 ## Issue #36 – Track per-ship actions each turn.
+## Issue #37 – Prevent illegal extra actions.
 
 const ProbeRules = preload("res://src/shared/ProbeRules.gd")
 
@@ -49,6 +50,22 @@ func begin_turn(_game_state: Object) -> void:
 ## Returns true if the given ship has not yet used its action this turn.
 func can_ship_act(ship_id: int) -> bool:
 	return not _actions_used.get(ship_id, false)
+
+
+## Records that ship_id has spent its action this turn.
+## Validates turn ownership and action budget before recording.
+## Returns RESULT_OK on success, or an error constant on failure.
+func record_action(game_state: Object, player_index: int, ship_id: int) -> String:
+	if game_state.turn_phase == "game_over":
+		return RESULT_GAME_OVER
+	if game_state.turn_phase != "combat":
+		return RESULT_NOT_COMBAT
+	if game_state.current_turn != player_index:
+		return RESULT_WRONG_TURN
+	if _actions_used.get(ship_id, false):
+		return RESULT_ALREADY_ACTED
+	_actions_used[ship_id] = true
+	return RESULT_OK
 
 
 ## Ends the active player's turn and passes control to the opponent.
