@@ -157,8 +157,8 @@ Expand the test suite as the project grows.  Do not commit code that fails tests
     *   No direct pushes or force-pushes.
     *   All merges must arrive via pull request with at least **1 approving review**.
     *   Stale approvals are dismissed when new commits are pushed to the PR branch.
-    *   Both CI checks (`Run GUT Tests` and `Run Playwright Tests`) must pass and the branch must be up to date with its target before merging.
-    *   Linear history is required — use squash or rebase merges only (no standard merge commits).
+    *   Both CI checks (`Run GUT Tests` and `Run Playwright Tests`) must pass before merging.
+    *   Merge commits, squash merges, and rebase merges are all permitted.
 
 # Boundaries
 
