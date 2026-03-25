@@ -37,7 +37,7 @@ jobs:
               --base staging \
               --head main \
               --title "chore: sync staging from main" \
-              --body "Automated sync to bring \`staging\` up to date with \`main\` after a squash merge.")
+              --body "Automated sync to bring \`staging\` up to date with \`main\` after a merge.")
             PR_NUMBER=$(basename "$PR_URL")
             echo "Created PR #$PR_NUMBER"
           else
@@ -45,5 +45,5 @@ jobs:
             echo "PR #$PR_NUMBER already exists"
           fi
 
-          gh pr merge "$PR_NUMBER" --auto --squash
+          gh pr merge "$PR_NUMBER" --auto --merge
           echo "Auto-merge enabled on PR #$PR_NUMBER"
