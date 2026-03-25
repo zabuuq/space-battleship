@@ -6,6 +6,7 @@ extends RefCounted
 ## Issue #35 – Implement turn manager.
 ## Issue #36 – Track per-ship actions each turn.
 ## Issue #37 – Prevent illegal extra actions.
+## Issue #38 – Implement end-turn flow.
 
 const ProbeRules = preload("res://src/shared/ProbeRules.gd")
 
@@ -69,6 +70,10 @@ func record_action(game_state: Object, player_index: int, ship_id: int) -> Strin
 
 
 ## Ends the active player's turn and passes control to the opponent.
+## Ticks all probe-mask cooldowns before advancing the turn counter.
 ## Call begin_turn after this to start the next player's turn.
 func end_turn(game_state: Object) -> void:
+	for ship in game_state.ships:
+		ProbeRules.tick_probe_mask(ship)
 	game_state.next_turn()
+	_actions_used.clear()
