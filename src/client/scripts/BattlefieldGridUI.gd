@@ -26,6 +26,7 @@ const CELL_SIZE = 16
 var selected_cell: Vector2i = Vector2i(-1, -1)
 var _hover_cell: Vector2i = Vector2i(-1, -1)
 var _placed_ship_cells: Dictionary = {}  # Vector2i -> Color
+var _state_cells: Dictionary = {}  # Vector2i -> String ("hit" | "miss" | "revealed")
 var _preview_cells: Array[Vector2i] = []
 var _preview_valid: bool = true
 var _action_preview_cells: Array[Vector2i] = []
@@ -60,6 +61,23 @@ func _draw() -> void:
 	for cell: Vector2i in _placed_ship_cells:
 		var color: Color = _placed_ship_cells[cell]
 		draw_rect(Rect2(grid_to_screen(cell), Vector2(CELL_SIZE, CELL_SIZE)), color)
+
+	# Draw cell state markers: hit (red X), miss (grey circle), revealed (orange border)
+	for cell: Vector2i in _state_cells:
+		var cell_rect := Rect2(grid_to_screen(cell), Vector2(CELL_SIZE, CELL_SIZE))
+		match _state_cells[cell]:
+			"hit":
+				draw_line(cell_rect.position, cell_rect.end, Color(0.9, 0.1, 0.1, 0.9), 2.0)
+				draw_line(
+					cell_rect.position + Vector2(CELL_SIZE, 0),
+					cell_rect.position + Vector2(0, CELL_SIZE),
+					Color(0.9, 0.1, 0.1, 0.9),
+					2.0
+				)
+			"miss":
+				draw_circle(cell_rect.get_center(), CELL_SIZE * 0.25, Color(0.7, 0.7, 0.7, 0.8))
+			"revealed":
+				draw_rect(cell_rect, Color(1.0, 0.6, 0.0, 0.35))
 
 	# Draw preview cells
 	var p_color := preview_valid_color if _preview_valid else preview_invalid_color
@@ -124,6 +142,13 @@ func get_cell_center(grid_pos: Vector2i) -> Vector2:
 ## Sets the overlay cells for placed ships. Keys are Vector2i positions, values are Colors.
 func set_placed_ship_cells(cells: Dictionary) -> void:
 	_placed_ship_cells = cells
+	queue_redraw()
+
+
+## Sets the cell state overlay for combat view. Keys are Vector2i positions;
+## values are "hit", "miss", or "revealed".
+func set_state_cells(states: Dictionary) -> void:
+	_state_cells = states
 	queue_redraw()
 
 
