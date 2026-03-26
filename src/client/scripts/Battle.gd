@@ -109,6 +109,7 @@ func _apply_game_state(state: Dictionary) -> void:
 	_game_state.from_dict(state)
 	_is_my_turn = _game_state.current_turn == _my_player_index
 	_set_status("Your turn." if _is_my_turn else "Opponent's turn.")
+	_refresh_enemy_grid()
 
 
 func _on_action_received(msg: Dictionary) -> void:
@@ -171,3 +172,21 @@ func _set_status(text: String) -> void:
 func _on_end_battle_button_pressed() -> void:
 	NetworkManager.last_match_result = {}
 	get_tree().change_scene_to_file("res://src/client/scenes/EndGame.tscn")
+
+
+## Redraws the enemy fog-of-war grid from missile and probe history.
+## Only cells hit, missed, or revealed by the local player's actions are shown.
+func _refresh_enemy_grid() -> void:
+	if not has_node("%EnemyGrid"):
+		return
+	var grid_ui := %EnemyGrid as Control
+	var state_cells: Dictionary = {}
+	for missile in _game_state.missile_history:
+		if missile.get("player", -1) == _my_player_index:
+			state_cells[missile["position"]] = missile["result"]
+	for probe in _game_state.probe_history:
+		if probe.get("player", -1) == _my_player_index:
+			for pos in probe.get("result", []):
+				if pos not in state_cells:
+					state_cells[pos] = "revealed"
+	grid_ui.set_state_cells(state_cells)
