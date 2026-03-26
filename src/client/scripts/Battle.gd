@@ -6,6 +6,7 @@ extends Control
 ## Issues: #43 Synchronise turn actions over the network,
 ##         #46 Build tabbed battlefield interface,
 ##         #47 Render player battlefield state,
+##         #48 Render enemy fog-of-war battlefield,
 ##         #53 Create end-game results screen.
 ##
 ## Expected scene nodes:
@@ -127,6 +128,7 @@ func _apply_game_state(state: Dictionary) -> void:
 	_is_my_turn = _game_state.current_turn == _my_player_index
 	_set_status("Your turn." if _is_my_turn else "Opponent's turn.")
 	_refresh_player_grid()
+	_refresh_enemy_grid()
 
 
 func _on_action_received(msg: Dictionary) -> void:
@@ -187,7 +189,7 @@ func _set_status(text: String) -> void:
 
 
 ## Redraws the player's fleet grid from the current game state.
-## Shows each ship in its assigned colour; hits from enemy missiles are marked.
+## Ships are shown in palette colours; enemy hits and misses are marked.
 func _refresh_player_grid() -> void:
 	if not has_node("%PlayerGrid"):
 		return
@@ -207,6 +209,24 @@ func _refresh_player_grid() -> void:
 	for missile in _game_state.missile_history:
 		if missile.get("player", -1) != _my_player_index:
 			state_cells[missile["position"]] = missile["result"]
+	grid_ui.set_state_cells(state_cells)
+
+
+## Redraws the enemy fog-of-war grid from missile and probe history.
+## Only cells hit, missed, or revealed by the local player's actions are shown.
+func _refresh_enemy_grid() -> void:
+	if not has_node("%EnemyGrid"):
+		return
+	var grid_ui := %EnemyGrid as Control
+	var state_cells: Dictionary = {}
+	for missile in _game_state.missile_history:
+		if missile.get("player", -1) == _my_player_index:
+			state_cells[missile["position"]] = missile["result"]
+	for probe in _game_state.probe_history:
+		if probe.get("player", -1) == _my_player_index:
+			for pos in probe.get("result", []):
+				if pos not in state_cells:
+					state_cells[pos] = "revealed"
 	grid_ui.set_state_cells(state_cells)
 
 
