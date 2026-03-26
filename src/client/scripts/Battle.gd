@@ -3,7 +3,8 @@ extends Control
 ## Battle
 ## Drives the combat phase: sends player actions to the relay server and
 ## applies confirmed updates broadcast by the server.
-## Issue #43 – Synchronise turn actions over the network.
+## Issues: #43 Synchronise turn actions over the network,
+##         #53 Create end-game results screen.
 ##
 ## Expected scene nodes (add in Godot editor):
 ##   %StatusLabel      – Label showing turn info / messages
@@ -142,11 +143,15 @@ func _on_turn_ended(_msg: Dictionary) -> void:
 
 func _on_opponent_disconnected() -> void:
 	_set_status("Opponent disconnected. You win!")
+	NetworkManager.last_match_result = {"won": true, "winner": _my_player_index}
+	get_tree().change_scene_to_file("res://src/client/scenes/EndGame.tscn")
 
 
 func _on_game_over(msg: Dictionary) -> void:
 	var winner: int = msg.get("winner", -1)
-	if winner == _my_player_index:
+	var won := winner == _my_player_index
+	NetworkManager.last_match_result = {"won": won, "winner": winner}
+	if won:
 		_set_status("You win!")
 	else:
 		_set_status("You lose.")
@@ -164,4 +169,5 @@ func _set_status(text: String) -> void:
 
 
 func _on_end_battle_button_pressed() -> void:
+	NetworkManager.last_match_result = {}
 	get_tree().change_scene_to_file("res://src/client/scenes/EndGame.tscn")
