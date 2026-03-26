@@ -32,15 +32,15 @@ const DEFAULT_URL := "ws://localhost:9090"
 # State
 # ---------------------------------------------------------------------------
 
-var _peer: WebSocketPeer = WebSocketPeer.new()
-var _connected := false
-var _url := DEFAULT_URL
-
 ## Stores the outcome of the most-recently completed match so EndGame can
 ## display the correct result. Set by Battle before changing scene.
 ## Keys: "won" (bool), "winner" (int player index).
 ## Issue #53 – Create end-game results screen.
 var last_match_result: Dictionary = {}
+
+var _peer: WebSocketPeer = WebSocketPeer.new()
+var _connected := false
+var _url := DEFAULT_URL
 
 # ---------------------------------------------------------------------------
 # Connection management
