@@ -4,11 +4,18 @@ extends Control
 ## Drives the combat phase: sends player actions to the relay server and
 ## applies confirmed updates broadcast by the server.
 ## Issues: #43 Synchronise turn actions over the network,
+##         #46 Build tabbed battlefield interface,
 ##         #53 Create end-game results screen.
 ##
-## Expected scene nodes (add in Godot editor):
-##   %StatusLabel      – Label showing turn info / messages
-##   %EndBattleButton  – Button (dev-only) to navigate to EndGame
+## Expected scene nodes:
+##   %TurnLabel            – Label showing current turn number
+##   %StatusLabel          – Label showing turn info / messages
+##   %EndTurnButton        – Button to end the player's turn
+##   %BattleTabContainer   – TabContainer with fleet and enemy tabs
+##   %PlayerGrid           – BattlefieldGridUI for the player's fleet
+##   %EnemyGrid            – BattlefieldGridUI for the enemy fog-of-war
+##   %ShipActionContainer  – HBoxContainer populated with per-ship panels
+##   %ActionHintLabel      – Label guiding the player on next input
 
 # ---------------------------------------------------------------------------
 # State
@@ -168,6 +175,13 @@ func _set_status(text: String) -> void:
 		(%StatusLabel as Label).text = text
 
 
-func _on_end_battle_button_pressed() -> void:
-	NetworkManager.last_match_result = {}
-	get_tree().change_scene_to_file("res://src/client/scenes/EndGame.tscn")
+## Triggered by the End Turn button in the status bar.
+func _on_end_turn_button_pressed() -> void:
+	submit_end_turn()
+	if has_node("%EndTurnButton"):
+		(%EndTurnButton as Button).disabled = true
+
+
+## Called when the player switches between the fleet and enemy tabs.
+func _on_tab_changed(_tab_index: int) -> void:
+	pass
