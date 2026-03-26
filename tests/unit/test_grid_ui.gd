@@ -47,11 +47,11 @@ func test_select_cell():
 	watch_signals(_grid_ui)
 	var pos = Vector2i(10, 5)
 	_grid_ui.select_cell(pos)
-	
+
 	assert_eq(_grid_ui.selected_cell, pos, "selected_cell should be updated")
 	assert_signal_emitted(_grid_ui, "cell_selected", "cell_selected signal should be emitted")
 	assert_signal_emitted_with_parameters(_grid_ui, "cell_selected", [pos], 0)
-	
+
 	# Selecting same cell should not emit again
 	_grid_ui.select_cell(pos)
 	assert_signal_emit_count(_grid_ui, "cell_selected", 1, "Should not emit again for same cell")
