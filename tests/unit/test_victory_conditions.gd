@@ -38,18 +38,22 @@ func _make_state_with_ships(ships: Array) -> GameState:
 
 
 func test_fleet_not_destroyed_when_ships_remain():
-	var state := _make_state_with_ships([
-		_make_ship(1, 3, false),
-		_make_ship(2, 0, true),
-	])
+	var state := _make_state_with_ships(
+		[
+			_make_ship(1, 3, false),
+			_make_ship(2, 0, true),
+		]
+	)
 	assert_false(state.is_fleet_destroyed(), "Fleet should not be destroyed while at least one ship survives")
 
 
 func test_fleet_destroyed_when_all_ships_at_zero_health():
-	var state := _make_state_with_ships([
-		_make_ship(1, 0, true),
-		_make_ship(2, 0, true),
-	])
+	var state := _make_state_with_ships(
+		[
+			_make_ship(1, 0, true),
+			_make_ship(2, 0, true),
+		]
+	)
 	assert_true(state.is_fleet_destroyed(), "Fleet should be destroyed when every ship has zero health")
 
 
@@ -126,15 +130,17 @@ func test_winner_survives_serialization_round_trip():
 func _make_logic_with_one_hit_ship() -> ServerGameLogic:
 	var state := GameState.new()
 	state.set_phase("combat")
-	state.add_ship({
-		"id": 1,
-		"type": "cruiser",
-		"position": Vector2i(10, 5),
-		"facing": Vector2i(1, 0),
-		"length": 3,
-		"health": 1,
-		"is_destroyed": false
-	})
+	state.add_ship(
+		{
+			"id": 1,
+			"type": "cruiser",
+			"position": Vector2i(10, 5),
+			"facing": Vector2i(1, 0),
+			"length": 3,
+			"health": 1,
+			"is_destroyed": false
+		}
+	)
 	var logic := ServerGameLogic.new()
 	logic.start_match(state.to_dict())
 	return logic
