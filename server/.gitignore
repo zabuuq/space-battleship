@@ -1,0 +1,7 @@
+# Node.js dependencies (root .gitignore covers node_modules globally)
+node_modules/
+
+# Runtime database – regenerated on server start; do not commit live data.
+# The placeholder relay.db committed to the repo is the initial empty seed.
+relay.db-wal
+relay.db-shm
