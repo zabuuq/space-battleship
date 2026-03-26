@@ -8,12 +8,13 @@ extends Control
 ##         #47 Render player battlefield state,
 ##         #48 Render enemy fog-of-war battlefield,
 ##         #49 Add ship action selection panel,
+##         #50 Add turn and status indicators,
 ##         #53 Create end-game results screen.
 ##
 ## Expected scene nodes:
 ##   %TurnLabel            – Label showing current turn number
 ##   %StatusLabel          – Label showing turn info / messages
-##   %EndTurnButton        – Button to end the player's turn
+##   %EndTurnButton        – Button to end the player's turn (enabled only on player's turn)
 ##   %BattleTabContainer   – TabContainer (index 1 = Enemy tab)
 ##   %PlayerGrid           – BattlefieldGridUI for the player's fleet
 ##   %EnemyGrid            – BattlefieldGridUI for enemy fog-of-war
@@ -121,6 +122,8 @@ func _apply_game_state(state: Dictionary) -> void:
 	_game_state.from_dict(state)
 	_is_my_turn = _game_state.current_turn == _my_player_index
 	_set_status("Your turn." if _is_my_turn else "Opponent's turn.")
+	if has_node("%EndTurnButton"):
+		(%EndTurnButton as Button).disabled = not _is_my_turn
 	_refresh_player_grid()
 	_refresh_enemy_grid()
 	_build_action_panel()
@@ -155,6 +158,8 @@ func _on_turn_ended(_msg: Dictionary) -> void:
 	_is_my_turn = true
 	_pending_action = {}
 	_set_status("Your turn.")
+	if has_node("%EndTurnButton"):
+		(%EndTurnButton as Button).disabled = false
 	_build_action_panel()
 
 
@@ -183,6 +188,8 @@ func _on_game_over(msg: Dictionary) -> void:
 func _set_status(text: String) -> void:
 	if has_node("%StatusLabel"):
 		(%StatusLabel as Label).text = text
+	if has_node("%TurnLabel"):
+		(%TurnLabel as Label).text = "Your turn" if _is_my_turn else "Opp's turn"
 
 
 ## Redraws the player's fleet grid from the current game state.
