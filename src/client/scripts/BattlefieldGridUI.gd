@@ -2,7 +2,8 @@ extends Control
 
 ## BattlefieldGridUI
 ## Renders the 120x12 grid and handles screen-to-grid translation.
-## Supports overlay rendering for placed ships and placement previews.
+## Supports overlay rendering for placed ships, placement previews,
+## cell state markers (hit/miss/revealed), and action targeting previews.
 
 signal cell_selected(grid_pos: Vector2i)
 signal cell_hovered(grid_pos: Vector2i)
@@ -27,6 +28,8 @@ var _hover_cell: Vector2i = Vector2i(-1, -1)
 var _placed_ship_cells: Dictionary = {}  # Vector2i -> Color
 var _preview_cells: Array[Vector2i] = []
 var _preview_valid: bool = true
+var _action_preview_cells: Array[Vector2i] = []
+var _action_preview_color: Color = Color(1.0, 0.85, 0.0, 0.5)
 
 
 func _ready() -> void:
@@ -67,6 +70,10 @@ func _draw() -> void:
 	if selected_cell != Vector2i(-1, -1):
 		var rect = Rect2(grid_to_screen(selected_cell), Vector2(CELL_SIZE, CELL_SIZE))
 		draw_rect(rect, selection_color)
+
+	# Draw action preview cells (targeting highlight for probe/missile actions)
+	for cell in _action_preview_cells:
+		draw_rect(Rect2(grid_to_screen(cell), Vector2(CELL_SIZE, CELL_SIZE)), _action_preview_color)
 
 	# Draw vertical lines
 	for x in range(GRID_WIDTH + 1):
@@ -124,4 +131,12 @@ func set_placed_ship_cells(cells: Dictionary) -> void:
 func set_preview_cells(cells: Array[Vector2i], valid: bool = true) -> void:
 	_preview_cells = cells
 	_preview_valid = valid
+	queue_redraw()
+
+
+## Sets the action preview overlay for combat targeting (probe/missile).
+## Pass an empty array to clear the preview. The optional color overrides the default yellow tint.
+func set_action_preview(cells: Array[Vector2i], color: Color = Color(1.0, 0.85, 0.0, 0.5)) -> void:
+	_action_preview_cells = cells
+	_action_preview_color = color
 	queue_redraw()
