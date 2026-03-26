@@ -4,11 +4,13 @@ extends Control
 ## Drives the combat phase: sends player actions to the relay server and
 ## applies confirmed updates broadcast by the server.
 ## Issues: #43 Synchronise turn actions over the network,
+##         #50 Add turn and status indicators,
 ##         #53 Create end-game results screen.
 ##
 ## Expected scene nodes (add in Godot editor):
+##   %TurnLabel        – Label showing whose turn it is
 ##   %StatusLabel      – Label showing turn info / messages
-##   %EndBattleButton  – Button (dev-only) to navigate to EndGame
+##   %EndTurnButton    – Button to end the player's turn (enabled only on player's turn)
 
 # ---------------------------------------------------------------------------
 # State
@@ -109,6 +111,8 @@ func _apply_game_state(state: Dictionary) -> void:
 	_game_state.from_dict(state)
 	_is_my_turn = _game_state.current_turn == _my_player_index
 	_set_status("Your turn." if _is_my_turn else "Opponent's turn.")
+	if has_node("%EndTurnButton"):
+		(%EndTurnButton as Button).disabled = not _is_my_turn
 
 
 func _on_action_received(msg: Dictionary) -> void:
@@ -139,6 +143,8 @@ func _apply_opponent_action(action: String, ship_id: int, params: Dictionary) ->
 func _on_turn_ended(_msg: Dictionary) -> void:
 	_is_my_turn = true
 	_set_status("Your turn.")
+	if has_node("%EndTurnButton"):
+		(%EndTurnButton as Button).disabled = false
 
 
 func _on_opponent_disconnected() -> void:
@@ -166,6 +172,8 @@ func _on_game_over(msg: Dictionary) -> void:
 func _set_status(text: String) -> void:
 	if has_node("%StatusLabel"):
 		(%StatusLabel as Label).text = text
+	if has_node("%TurnLabel"):
+		(%TurnLabel as Label).text = "Your turn" if _is_my_turn else "Opp's turn"
 
 
 func _on_end_battle_button_pressed() -> void:
