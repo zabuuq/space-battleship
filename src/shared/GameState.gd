@@ -91,11 +91,11 @@ func to_dict() -> Dictionary:
 
 ## Deserializes the game state from a dictionary.
 func from_dict(data: Dictionary) -> void:
-	ships = data.get("ships", [])
+	ships.assign(data.get("ships", []))
 	current_turn = data.get("current_turn", 0)
 	turn_phase = data.get("turn_phase", "placement")
-	probe_history = data.get("probe_history", [])
-	missile_history = data.get("missile_history", [])
+	probe_history.assign(data.get("probe_history", []))
+	missile_history.assign(data.get("missile_history", []))
 
 	# Rebuild grid state from ships and history
 	grid._initialize_grid()
@@ -107,6 +107,11 @@ func from_dict(data: Dictionary) -> void:
 		for i in range(length):
 			var cell_pos = pos + facing * i
 			grid.set_cell_occupant(cell_pos, ship_id)
+
+	for probe in probe_history:
+		var detected: Variant = probe.get("result", [])
+		for pos in detected:
+			grid.set_cell_state(pos, "revealed")
 
 	for missile in missile_history:
 		grid.set_cell_state(missile["position"], missile["result"])
