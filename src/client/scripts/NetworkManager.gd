@@ -5,7 +5,7 @@ extends Node
 ## emits signals when messages arrive from the server.
 ##
 ## Issues: #41 WebSocket connection layer, #43 Turn action sync,
-##         #44 Disconnect handling.
+##         #44 Disconnect handling, #53 End-game results screen.
 ##
 ## Register as autoload "NetworkManager" in project.godot.
 
@@ -35,6 +35,12 @@ const DEFAULT_URL := "ws://localhost:9090"
 var _peer: WebSocketPeer = WebSocketPeer.new()
 var _connected := false
 var _url := DEFAULT_URL
+
+## Stores the outcome of the most-recently completed match so EndGame can
+## display the correct result. Set by Battle before changing scene.
+## Keys: "won" (bool), "winner" (int player index).
+## Issue #53 – Create end-game results screen.
+var last_match_result: Dictionary = {}
 
 # ---------------------------------------------------------------------------
 # Connection management
