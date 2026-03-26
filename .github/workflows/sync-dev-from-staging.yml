@@ -45,5 +45,5 @@ jobs:
             echo "PR #$PR_NUMBER already exists"
           fi
 
-          gh pr merge "$PR_NUMBER" --auto --merge
-          echo "Auto-merge enabled on PR #$PR_NUMBER"
+          gh pr merge "$PR_NUMBER" --merge --yes
+          echo "Merged sync PR #$PR_NUMBER into dev"
