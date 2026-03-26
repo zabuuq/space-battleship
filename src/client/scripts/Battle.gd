@@ -4,11 +4,27 @@ extends Control
 ## Drives the combat phase: sends player actions to the relay server and
 ## applies confirmed updates broadcast by the server.
 ## Issues: #43 Synchronise turn actions over the network,
+##         #47 Render player battlefield state,
 ##         #53 Create end-game results screen.
 ##
-## Expected scene nodes (add in Godot editor):
-##   %StatusLabel      – Label showing turn info / messages
-##   %EndBattleButton  – Button (dev-only) to navigate to EndGame
+## Expected scene nodes:
+##   %TurnLabel            – Label showing current turn number
+##   %StatusLabel          – Label showing turn info / messages
+##   %EndTurnButton        – Button to end the player's turn
+##   %BattleTabContainer   – TabContainer with fleet and enemy tabs
+##   %PlayerGrid           – BattlefieldGridUI for the player's fleet
+##   %EnemyGrid            – BattlefieldGridUI for the enemy fog-of-war
+##   %ShipActionContainer  – HBoxContainer populated with per-ship panels
+##   %ActionHintLabel      – Label guiding the player on next input
+
+## One colour per fleet slot — matched by ship id modulo palette size.
+const SHIP_COLORS: Array[Color] = [
+	Color(0.2, 0.6, 1.0, 0.7),
+	Color(1.0, 0.5, 0.1, 0.7),
+	Color(0.2, 0.8, 0.3, 0.7),
+	Color(0.9, 0.2, 0.2, 0.7),
+	Color(0.7, 0.3, 0.9, 0.7),
+]
 
 # ---------------------------------------------------------------------------
 # State
@@ -109,6 +125,7 @@ func _apply_game_state(state: Dictionary) -> void:
 	_game_state.from_dict(state)
 	_is_my_turn = _game_state.current_turn == _my_player_index
 	_set_status("Your turn." if _is_my_turn else "Opponent's turn.")
+	_refresh_player_grid()
 
 
 func _on_action_received(msg: Dictionary) -> void:
@@ -168,6 +185,25 @@ func _set_status(text: String) -> void:
 		(%StatusLabel as Label).text = text
 
 
-func _on_end_battle_button_pressed() -> void:
-	NetworkManager.last_match_result = {}
-	get_tree().change_scene_to_file("res://src/client/scenes/EndGame.tscn")
+## Redraws the player's fleet grid from the current game state.
+## Shows each ship in its assigned colour; hits from enemy missiles are marked.
+func _refresh_player_grid() -> void:
+	if not has_node("%PlayerGrid"):
+		return
+	var grid_ui := %PlayerGrid as Control
+	var ship_cells: Dictionary = {}
+	for ship in _game_state.ships:
+		var color: Color = (
+			Color(0.35, 0.35, 0.35, 0.7)
+			if ship.get("is_destroyed", false)
+			else SHIP_COLORS[ship["id"] % SHIP_COLORS.size()]
+		)
+		for i in range(ship.get("length", 0)):
+			var cell: Vector2i = ship["position"] + ship["facing"] * i
+			ship_cells[cell] = color
+	grid_ui.set_placed_ship_cells(ship_cells)
+	var state_cells: Dictionary = {}
+	for missile in _game_state.missile_history:
+		if missile.get("player", -1) != _my_player_index:
+			state_cells[missile["position"]] = missile["result"]
+	grid_ui.set_state_cells(state_cells)
