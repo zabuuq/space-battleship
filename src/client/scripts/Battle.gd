@@ -7,15 +7,16 @@ extends Control
 ##         #46 Build tabbed battlefield interface,
 ##         #47 Render player battlefield state,
 ##         #48 Render enemy fog-of-war battlefield,
+##         #49 Add ship action selection panel,
 ##         #53 Create end-game results screen.
 ##
 ## Expected scene nodes:
 ##   %TurnLabel            – Label showing current turn number
 ##   %StatusLabel          – Label showing turn info / messages
 ##   %EndTurnButton        – Button to end the player's turn
-##   %BattleTabContainer   – TabContainer with fleet and enemy tabs
+##   %BattleTabContainer   – TabContainer (index 1 = Enemy tab)
 ##   %PlayerGrid           – BattlefieldGridUI for the player's fleet
-##   %EnemyGrid            – BattlefieldGridUI for the enemy fog-of-war
+##   %EnemyGrid            – BattlefieldGridUI for enemy fog-of-war
 ##   %ShipActionContainer  – HBoxContainer populated with per-ship panels
 ##   %ActionHintLabel      – Label guiding the player on next input
 
@@ -35,6 +36,7 @@ const SHIP_COLORS: Array[Color] = [
 var _my_player_index := 0
 var _game_state: GameState = GameState.new()
 var _is_my_turn := false
+var _pending_action: Dictionary = {}  # {ship_id, action} while awaiting grid click
 
 # ---------------------------------------------------------------------------
 # Lifecycle
@@ -44,6 +46,18 @@ var _is_my_turn := false
 func _ready() -> void:
 	NetworkManager.message_received.connect(_on_message_received)
 	NetworkManager.disconnected_from_server.connect(_on_disconnected)
+	if has_node("%EnemyGrid"):
+		var eg := %EnemyGrid as Control
+		eg.cell_selected.connect(_on_enemy_grid_cell_selected)
+		eg.cell_hovered.connect(
+			func(pos: Vector2i) -> void:
+				if _pending_action.is_empty():
+					return
+				var cells: Array[Vector2i] = (
+					ProbeRules.get_probe_cells(pos) if _pending_action.get("action") == "probe" else [pos]
+				)
+				eg.set_action_preview(cells)
+		)
 
 
 func _exit_tree() -> void:
@@ -54,36 +68,8 @@ func _exit_tree() -> void:
 
 
 # ---------------------------------------------------------------------------
-# Public API – called by UI action controls
+# Action submission
 # ---------------------------------------------------------------------------
-
-
-## Sends a move_forward action for the given ship.
-func submit_move_forward(ship_id: int, steps: int) -> void:
-	if not _is_my_turn:
-		return
-	NetworkManager.send_perform_action(ship_id, "move_forward", {"steps": steps})
-
-
-## Sends a turn action for the given ship.
-func submit_turn(ship_id: int, direction: String) -> void:
-	if not _is_my_turn:
-		return
-	NetworkManager.send_perform_action(ship_id, "turn", {"direction": direction})
-
-
-## Sends a probe action for the given ship.
-func submit_probe(ship_id: int, center_x: int, center_y: int) -> void:
-	if not _is_my_turn:
-		return
-	NetworkManager.send_perform_action(ship_id, "probe", {"x": center_x, "y": center_y})
-
-
-## Sends a missile action for the given ship.
-func submit_missile(ship_id: int, target_x: int, target_y: int) -> void:
-	if not _is_my_turn:
-		return
-	NetworkManager.send_perform_action(ship_id, "missile", {"x": target_x, "y": target_y})
 
 
 ## Ends the current player's turn and sends the latest state snapshot.
@@ -91,8 +77,16 @@ func submit_end_turn() -> void:
 	if not _is_my_turn:
 		return
 	_is_my_turn = false
+	_pending_action = {}
 	NetworkManager.send_end_turn(_game_state.to_dict())
 	_set_status("Waiting for opponent…")
+
+
+## Sends a validated action to the server. Only called when it is the player's turn.
+func _send_ship_action(ship_id: int, action: String, params: Dictionary) -> void:
+	if not _is_my_turn:
+		return
+	NetworkManager.send_perform_action(ship_id, action, params)
 
 
 # ---------------------------------------------------------------------------
@@ -129,6 +123,7 @@ func _apply_game_state(state: Dictionary) -> void:
 	_set_status("Your turn." if _is_my_turn else "Opponent's turn.")
 	_refresh_player_grid()
 	_refresh_enemy_grid()
+	_build_action_panel()
 
 
 func _on_action_received(msg: Dictionary) -> void:
@@ -158,7 +153,9 @@ func _apply_opponent_action(action: String, ship_id: int, params: Dictionary) ->
 
 func _on_turn_ended(_msg: Dictionary) -> void:
 	_is_my_turn = true
+	_pending_action = {}
 	_set_status("Your turn.")
+	_build_action_panel()
 
 
 func _on_opponent_disconnected() -> void:
@@ -179,7 +176,7 @@ func _on_game_over(msg: Dictionary) -> void:
 
 
 # ---------------------------------------------------------------------------
-# Helpers
+# Grid rendering
 # ---------------------------------------------------------------------------
 
 
@@ -228,6 +225,83 @@ func _refresh_enemy_grid() -> void:
 				if pos not in state_cells:
 					state_cells[pos] = "revealed"
 	grid_ui.set_state_cells(state_cells)
+
+
+# ---------------------------------------------------------------------------
+# Action panel
+# ---------------------------------------------------------------------------
+
+
+## Rebuilds the ship action panel for the current turn. Clears buttons when
+## it is not the player's turn so the panel does not show stale controls.
+func _build_action_panel() -> void:
+	if not has_node("%ShipActionContainer"):
+		return
+	var container := %ShipActionContainer as HBoxContainer
+	for child in container.get_children():
+		child.queue_free()
+	if not _is_my_turn:
+		return
+	for ship in _game_state.ships:
+		if ship.get("is_destroyed", false):
+			continue
+		var sid: int = ship["id"]
+		var stype: String = ship.get("type", "")
+		var card := VBoxContainer.new()
+		var name_lbl := Label.new()
+		name_lbl.text = "%s (HP:%d)" % [stype.capitalize(), ship.get("health", 0)]
+		card.add_child(name_lbl)
+		for pair in [
+			["Fwd", "move_forward"],
+			["Left", "turn_left"],
+			["Right", "turn_right"],
+			["Probe", "probe"],
+			["Missile", "missile"]
+		]:
+			var btn := Button.new()
+			btn.text = pair[0]
+			btn.pressed.connect(_on_ship_action_selected.bind(sid, pair[1]))
+			card.add_child(btn)
+		container.add_child(card)
+
+
+## Handles a ship action button press. Immediate actions are sent to the server;
+## targeting actions (probe, missile) wait for a grid click.
+func _on_ship_action_selected(ship_id: int, action: String) -> void:
+	if not _is_my_turn:
+		return
+	if action in ["probe", "missile"]:
+		_pending_action = {"ship_id": ship_id, "action": action}
+		if has_node("%BattleTabContainer"):
+			(%BattleTabContainer as TabContainer).current_tab = 1
+		if has_node("%ActionHintLabel"):
+			(%ActionHintLabel as Label).text = "Click the enemy grid to target your %s." % action
+		return
+	_pending_action = {}
+	if action == "move_forward":
+		_send_ship_action(ship_id, "move_forward", {"steps": 1})
+	elif action in ["turn_left", "turn_right"]:
+		var dir := "left" if action == "turn_left" else "right"
+		_send_ship_action(ship_id, "turn", {"direction": dir})
+
+
+## Called when the player clicks the enemy grid. Confirms a pending targeting action.
+func _on_enemy_grid_cell_selected(pos: Vector2i) -> void:
+	if _pending_action.is_empty():
+		return
+	var ship_id: int = _pending_action.get("ship_id", -1)
+	var action: String = _pending_action.get("action", "")
+	_pending_action = {}
+	_send_ship_action(ship_id, action, {"x": pos.x, "y": pos.y})
+	if has_node("%EnemyGrid"):
+		(%EnemyGrid as Control).set_action_preview([])
+	if has_node("%ActionHintLabel"):
+		(%ActionHintLabel as Label).text = "Action sent."
+
+
+# ---------------------------------------------------------------------------
+# Toolbar handlers
+# ---------------------------------------------------------------------------
 
 
 ## Triggered by the End Turn button in the status bar.
