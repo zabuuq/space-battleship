@@ -4,7 +4,8 @@ extends RefCounted
 ## Authoritative server-side game logic processor.
 ## Validates and applies player actions using ActionValidator and the
 ## appropriate Rules class, then returns a result suitable for broadcast.
-## Issue #69 – Implement authoritative server game logic.
+## Issues: #69 Implement authoritative server game logic,
+##         #51 Detect full fleet destruction, #52 Win and loss state handling.
 
 const ActionValidator = preload("res://src/shared/ActionValidator.gd")
 const MovementRules = preload("res://src/shared/MovementRules.gd")
@@ -66,8 +67,8 @@ func process_action(player_index: int, action_dict: Dictionary) -> Dictionary:
 
 	_apply(player_index, action, ship_id, params)
 
-	if _is_fleet_destroyed(1 - player_index):
-		game_state.set_phase("game_over")
+	if game_state.is_fleet_destroyed():
+		game_state.set_game_over(player_index)
 		return {"result": RESULT_GAME_OVER, "state": game_state.to_dict(), "winner": player_index, "game_over": true}
 
 	return {"result": RESULT_OK, "state": game_state.to_dict(), "game_over": false}
@@ -118,16 +119,3 @@ func _apply(player_index: int, action: String, ship_id: int, params: Dictionary)
 			ProbeRules.fire_probe(game_state, player_index, Vector2i(params.get("x", 0), params.get("y", 0)))
 		"missile":
 			MissileRules.fire_missile(game_state, player_index, Vector2i(params.get("x", 0), params.get("y", 0)))
-
-
-## Returns true when every ship in game_state has is_destroyed = true.
-## In a two-player match the caller passes the defender's player_index so
-## the name is intentional; this implementation assumes the game_state
-## represents the targeted fleet only (server maintains one state per player).
-func _is_fleet_destroyed(_player_index: int) -> bool:
-	if game_state.ships.is_empty():
-		return false
-	for ship: Dictionary in game_state.ships:
-		if not ship.get("is_destroyed", false):
-			return false
-	return true

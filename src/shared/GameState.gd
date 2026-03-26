@@ -3,6 +3,7 @@ extends RefCounted
 ## GameState
 ## The high-level container representing the full match state.
 ## Coordinates between ship data, turn state, and the battlefield grid.
+## Issues: #51 Detect full fleet destruction, #52 Win and loss state handling.
 
 const BattlefieldGrid = preload("res://src/shared/BattlefieldGrid.gd")
 
@@ -24,6 +25,9 @@ var grid: BattlefieldGrid
 # Turn state
 var current_turn: int = 0  # 0 or 1 for player indices
 var turn_phase: String = "placement"  # placement, combat, game_over
+
+# Victory state – set when turn_phase transitions to "game_over"
+var winner: int = -1  # player index of the winner, or -1 if game is still in progress
 
 # History of actions
 var probe_history: Array[Dictionary] = []
@@ -78,12 +82,31 @@ func set_phase(phase: String) -> void:
 	turn_phase = phase
 
 
+## Transitions the game to game_over and records the winner.
+## Issue #52 – Implement win and loss state handling.
+func set_game_over(winning_player: int) -> void:
+	turn_phase = "game_over"
+	winner = winning_player
+
+
+## Returns true when every ship in this state's fleet has been destroyed.
+## Issue #51 – Detect full fleet destruction.
+func is_fleet_destroyed() -> bool:
+	if ships.is_empty():
+		return false
+	for ship: Dictionary in ships:
+		if not ship.get("is_destroyed", false):
+			return false
+	return true
+
+
 ## Serializes the game state to a dictionary.
 func to_dict() -> Dictionary:
 	return {
 		"ships": ships,
 		"current_turn": current_turn,
 		"turn_phase": turn_phase,
+		"winner": winner,
 		"probe_history": probe_history,
 		"missile_history": missile_history
 	}
@@ -94,6 +117,7 @@ func from_dict(data: Dictionary) -> void:
 	ships.assign(data.get("ships", []))
 	current_turn = data.get("current_turn", 0)
 	turn_phase = data.get("turn_phase", "placement")
+	winner = data.get("winner", -1)
 	probe_history.assign(data.get("probe_history", []))
 	missile_history.assign(data.get("missile_history", []))
 
